@@ -41,7 +41,7 @@ class Vocab(object):
       self.id_to_word[self.count] = w
       self.count += 1
 
-    with open(vocab_file, 'r') as vocab_f:
+    with open(vocab_file, 'r', encoding='utf8') as vocab_f:
       for line in vocab_f:
         pieces = line.split()
         if len(pieces) != 2:

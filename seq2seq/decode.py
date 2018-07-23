@@ -102,11 +102,11 @@ class BeamSearchDecoder(object):
         self._write_for_rouge(original_abstract, decoded_words, counter)
         counter += 1
       else:
-        print ""
+        print("")
         print('INFO: ARTICLE: {}'.format(article_withunks))
         print('INFO: REFERENCE SUMMARY: {}'.format(abstract_withunks))
         print('INFO: GENERATED SUMMARY: {}'.format(decoded_output))
-        print ""
+        print("")
         self._write_for_attnvis(article_withunks, abstract_withunks, decoded_words, best_hyp.attn_dists, best_hyp.pointers)
 
         t1 = time.time()

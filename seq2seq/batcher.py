@@ -16,7 +16,7 @@
 
 import glob
 import time
-import Queue
+import queue
 import struct
 import numpy as np
 import tensorflow as tf
@@ -48,7 +48,7 @@ class Batch(object):
       
       self.dec_batch[i, :] = ex.dec_input[:]
       self.target_batch[i, :] = ex.dec_target[:]
-      for j in xrange(ex.dec_len):
+      for j in range(ex.dec_len):
         self.padding_mark[i][j] = 1
 
     if hps.pointer:
@@ -74,8 +74,8 @@ class Batcher(object):
     self.hps = hps
     self.onetime = onetime
 
-    self.batch_queue = Queue.Queue(self.BATCH_QUEUE_MAX)
-    self.input_queue = Queue.Queue(self.BATCH_QUEUE_MAX * self.hps.batch_size)
+    self.batch_queue = queue.Queue(self.BATCH_QUEUE_MAX)
+    self.input_queue = queue.Queue(self.BATCH_QUEUE_MAX * self.hps.batch_size)
 
     if onetime:
       self.num_input_threads = 1
@@ -88,13 +88,13 @@ class Batcher(object):
       self.cache_size = 100
 
     self.input_threads = []
-    for _ in xrange(self.num_input_threads):
+    for _ in range(self.num_input_threads):
       self.input_threads.append(Thread(target=self._fill_input_queue))
       self.input_threads[-1].daemon = True
       self.input_threads[-1].start()
       
     self.batch_threads = []
-    for _ in xrange(self.num_batch_threads):
+    for _ in range(self.num_batch_threads):
       self.batch_threads.append(Thread(target=self._fill_batch_queue))
       self.batch_threads[-1].daemon = True
       self.batch_threads[-1].start()
@@ -161,17 +161,17 @@ class Batcher(object):
     while True:
       if self.hps.mode == 'decode':
         ex = self.input_queue.get()
-        b = [ex for _ in xrange(self.hps.batch_size)]
+        b = [ex for _ in range(self.hps.batch_size)]
         self.batch_queue.put(Batch(b, self.hps, self.vocab))
 
       else:
         inputs = []
-        for _ in xrange(self.hps.batch_size * self.cache_size):
+        for _ in range(self.hps.batch_size * self.cache_size):
           inputs.append(self.input_queue.get())
         inputs.sort(key=lambda e: e.enc_len)
 
         batches = []
-        for i in xrange(0, len(inputs), self.hps.batch_size):
+        for i in range(0, len(inputs), self.hps.batch_size):
           batches.append(inputs[i:i + self.hps.batch_size])
         if not self.onetime:
           shuffle(batches)

@@ -193,9 +193,9 @@ def main(unused_argv):
   hparam_list = ['mode', 'lr', 'adagrad_acc', 'norm_unif', 'norm_trunc', 'norm_grad', 'pointer',
    'hidden_dim', 'emb_dim', 'batch_size', 'max_dec_steps', 'max_enc_steps']
   hps_dict = {}
-  for key,val in FLAGS.__flags.iteritems():
+  for key,val in FLAGS.__flags.items():
     if key in hparam_list:
-      hps_dict[key] = val
+      hps_dict[key] = val.value
   hps = namedtuple("HParams", hps_dict.keys())(**hps_dict)
 
   vocab = Vocab(FLAGS.vocab_path, FLAGS.vocab_size)
