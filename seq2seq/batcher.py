@@ -135,7 +135,7 @@ class Batcher(object):
                 with open(f, 'r', encoding='utf8') as reader:
                     articles = json.load(reader)
                     for article in articles:
-                        if len(article['origin_text']) == 0:
+                        if len(article['article_text_segmented']) < 5:
                             print('WARNING: Found an example with empty article, skipped.')
                             continue
 
