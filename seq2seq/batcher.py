@@ -20,6 +20,7 @@ import queue
 import struct
 import numpy as np
 import tensorflow as tf
+import json
 
 from random import shuffle
 from threading import Thread
@@ -128,27 +129,36 @@ class Batcher(object):
         shuffle(filelist)
         
       for f in filelist:
-        with open(f, 'rb') as reader:
-          while True:
-            len_bytes = reader.read(8)
-            if not len_bytes: break
-            str_len = struct.unpack('q', len_bytes)[0]
-            example_str = struct.unpack('%ds' % str_len, reader.read(str_len))[0]
-            e = example_pb2.Example.FromString(example_str)
-            
-            try:
-              article_text = e.features.feature['article'].bytes_list.value[0]
-              abstract_text = e.features.feature['abstract'].bytes_list.value[0]
-            except ValueError:
-              print('WARNING: Failed to get article or abstract from example: {}'.format(text_format.MessageToString(e)))
-              continue
-              
-            if len(article_text)==0:
+        with open(f, 'r', encoding='utf8') as reader:
+          articles = json.load(reader)
+          for article in articles:
+            if len(article['origin_text']) == 0:
               print('WARNING: Found an example with empty article, skipped.')
               continue
             
-            example = Example(article_text, abstract_text, self.vocab, self.hps)
+            example = Example(article['article_text'], article['abstract_text'], self.vocab, self.hps)
             self.input_queue.put(example)
+        # with open(f, 'rb') as reader:
+        #   while True:
+        #     len_bytes = reader.read(8)
+        #     if not len_bytes: break
+        #     str_len = struct.unpack('q', len_bytes)[0]
+        #     example_str = struct.unpack('%ds' % str_len, reader.read(str_len))[0]
+        #     e = example_pb2.Example.FromString(example_str)
+            
+        #     try:
+        #       article_text = e.features.feature['article'].bytes_list.value[0]
+        #       abstract_text = e.features.feature['abstract'].bytes_list.value[0]
+        #     except ValueError:
+        #       print('WARNING: Failed to get article or abstract from example: {}'.format(text_format.MessageToString(e)))
+        #       continue
+              
+        #     if len(article_text)==0:
+        #       print('WARNING: Found an example with empty article, skipped.')
+        #       continue
+            
+        #     example = Example(article_text, abstract_text, self.vocab, self.hps)
+        #     self.input_queue.put(example)
       
       if self.onetime and self.hps.mode=='decode':
         print('INFO: onetime thread mode is on, we\'ve finished reading dataset, thread stopping...')
